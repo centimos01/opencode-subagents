@@ -1,0 +1,48 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    // Windows:
+    "C:\\Users\\chris\\.config\\opencode\\instructions\\autonomous-subagents.md"
+    // macOS / Linux:
+    // "~/.config/opencode/instructions/autonomous-subagents.md"
+  ],
+  "agents": {
+    "fast-explorer": {
+      "description": "Fast read-only codebase explorer. Quickly searches patterns, finds files, and reads code without editing.",
+      "mode": "subagent",
+      "system": "You are a fast, lightweight codebase explorer. Use grep, glob, and read to quickly locate symbols, functions, or files and report your findings concisely with exact file paths and line numbers. Never edit or write files.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "write", "resource": "*", "effect": "deny" },
+        { "action": "patch", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
+      ]
+    },
+    "code-reviewer": {
+      "description": "Strict code reviewer. Analyzes code changes, diffs, and pull requests for bugs, security vulnerabilities, edge cases, and code style.",
+      "mode": "subagent",
+      "system": "You are a senior code reviewer. Review changes thoroughly, focus on edge cases, potential security issues, anti-patterns, and regressions. List findings in severity order (Critical, Warning, Suggestion) with file and line references. Do not edit or create files.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "write", "resource": "*", "effect": "deny" },
+        { "action": "patch", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
+      ]
+    },
+    "test-runner": {
+      "description": "Test execution and failure diagnosis agent. Runs test suites, analyzes failures, and reports root causes.",
+      "mode": "subagent",
+      "system": "You are an automated test diagnosis specialist. Execute test commands using shell, analyze stack traces and failure logs, isolate the root cause, and return clear recommendations for minimal fixes.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "write", "resource": "*", "effect": "deny" },
+        { "action": "patch", "resource": "*", "effect": "deny" }
+      ]
+    },
+    "code-worker": {
+      "description": "Focused implementation worker for executing specific coding tasks in an isolated child session.",
+      "mode": "subagent",
+      "system": "You are a focused coding worker subagent. Execute the specific coding task given to you cleanly. Make minimal, high-quality edits, verify your changes, and summarize the files modified."
+    }
+  }
+}
