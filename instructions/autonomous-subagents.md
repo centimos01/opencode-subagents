@@ -28,7 +28,7 @@ The following subagents are already installed globally and ready to invoke immed
 
 ## How to Create New Subagents Dynamically (On the Fly)
 
-Whenever you encounter a domain or task that needs a tailored helper (e.g., `data-migrator`, `perf-profiler`, `api-tester`, `doc-writer`), **create it yourself immediately**:
+Whenever you encounter a domain or task that needs a tailored helper (e.g., `data-migrator`, `perf-profiler`, `api-tester`, `doc-writer`), **create it yourself immediately**. Subagents created this way are temporary, so delete each one as soon as its task finishes (see *Temporary Subagent Lifecycle* below):
 
 ### Recommended Method: Automated Script
 Run the helper script via your `shell` tool:
@@ -42,6 +42,15 @@ node C:/Users/chris/.config/opencode/scripts/define-subagent.mjs --name "my-suba
 - `--preset`: `readonly` (for search/docs/analysis), `review` (for diff reviews), `test` (for test suites), or `worker` (full edit capabilities).
 - `--model`: (Optional) specify a specific model override if needed.
 - `--global`: (Optional) persist globally across all projects instead of only current workspace.
+
+### Temporary Subagent Lifecycle (Mandatory Cleanup)
+
+Subagents created on the fly are **temporary** and must not leave files behind:
+1. **Create** the subagent with the script.
+2. **Use** it with the `subagent` tool.
+3. **Remove it immediately after its task finishes**: run the `cleanup_command` returned by the script (equivalent to `node .../define-subagent.mjs --remove "<name>" --dir "<agentsDir>"`). It deletes the markdown file, cleans legacy `agents.<name>` entries from `opencode.jsonc`, and prunes empty `.opencode/agents` folders. Never end your turn while a temporary subagent file still exists.
+
+If create reports `agent_exists`, it is usually a leftover temporary subagent: delete it with the printed `cleanup_command` and create it again. Only keep a subagent when the user explicitly asked for a reusable one (prefer `--global` for those). If unsure about leftovers, run `--list` and remove the temporary project agents you no longer need.
 
 ### Alternative Method: Direct Markdown File
 Use your `write` tool to create `.opencode/agents/<name>.md`:
@@ -59,7 +68,7 @@ permissions:
 ---
 Detailed system prompt instructions for this subagent...
 ```
-After creating the file, run `opencode reload` via `shell` so OpenCode immediately registers it.
+After creating the file, run `opencode reload` via `shell` so OpenCode immediately registers it, and delete the file once the subagent's task is finished (temporary subagents must not leave files behind).
 
 ---
 
@@ -76,3 +85,4 @@ Use OpenCode's native `subagent` tool:
 
 - Set `"background": true` if you want the subagent to run asynchronously while you proceed.
 - Pass `"sessionID"` if you need to continue an existing child session with follow-up prompts.
+- Right after the subagent returns its result, run its cleanup command (see *Temporary Subagent Lifecycle*) before moving on to other work.

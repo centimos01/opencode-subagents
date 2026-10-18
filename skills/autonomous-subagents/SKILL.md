@@ -21,6 +21,13 @@ node C:/Users/chris/.config/opencode/scripts/define-subagent.mjs --name "<name>"
 
 Add `--global` to make the subagent available across all projects, or omit it to keep it scoped to the current project repository (`.opencode/agents/`).
 
+## Cleanup (Mandatory — No Residue on Disk)
+
+Subagents created on the fly are temporary. Immediately after the subagent completes its task, delete it so nothing is left behind:
+- Run the `cleanup_command` returned by `define-subagent.mjs` (equivalent to `node ... --remove "<name>" --dir "<agentsDir>"`). It deletes the markdown file, cleans legacy `agents.<name>` config entries written by older versions, and prunes empty `.opencode/agents` folders.
+- Never end your turn while a leftover temporary subagent file exists; use `--list` if unsure and remove temporary project agents you no longer need.
+- Keep a subagent only when the user explicitly asked for a reusable one (prefer `--global` for those).
+
 ## Invoking a Subagent
 
 Once created (or using built-in subagents like `fast-explorer`, `code-reviewer`, `test-runner`), invoke them with the `subagent` tool:
