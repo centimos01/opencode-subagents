@@ -31,7 +31,12 @@ cp "$SRC_DIR/agents/"*.md "$DEST_AGENTS/"
 echo "5. Configurando $CONFIG_FILE..."
 if [ ! -f "$CONFIG_FILE" ]; then
     cp "$SRC_DIR/opencode.example.jsonc" "$CONFIG_FILE"
-    sed -i "s|C:\\\\Users\\\\chris\\\\.config\\\\opencode\\\\instructions\\\\autonomous-subagents.md|$DEST_INSTRUCTIONS/autonomous-subagents.md|g" "$CONFIG_FILE" || true
+    if sed "s|C:\\\\\\\\Users\\\\\\\\chris\\\\\\\\.config\\\\\\\\opencode\\\\\\\\instructions\\\\\\\\autonomous-subagents.md|$DEST_INSTRUCTIONS/autonomous-subagents.md|" "$CONFIG_FILE" > "$CONFIG_FILE.tmp"; then
+        mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+    else
+        rm -f "$CONFIG_FILE.tmp"
+        echo "   Aviso: no se pudo ajustar la ruta de instructions automaticamente."
+    fi
     echo "   Archivo $CONFIG_FILE creado exitosamente."
 else
     echo "   El archivo $CONFIG_FILE ya existe. Comprueba que contenga la clave 'instructions' apuntando a $DEST_INSTRUCTIONS/autonomous-subagents.md."
