@@ -1,4 +1,4 @@
-# Guía de Implementación: Subagentes Autónomos en OpenCode v2
+# Subagentes Autónomos en OpenCode v2
 
 Esta guía contiene la arquitectura, el código y las instrucciones paso a paso para replicar en cualquier ordenador el sistema de **subagentes autónomos y de alta velocidad** para OpenCode.
 
