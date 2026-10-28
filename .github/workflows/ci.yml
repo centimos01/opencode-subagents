@@ -26,24 +26,24 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm ci
 
       - name: Run linting
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm run lint
 
       - name: Run type checking
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm run typecheck
 
       - name: Run tests
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm run test
         timeout-minutes: 10
 
       - name: Build project
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm run build
 
       - name: Upload coverage
@@ -75,11 +75,11 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm ci
 
       - name: Run tests
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm run test
         timeout-minutes: 10
 
@@ -103,11 +103,11 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm ci
 
       - name: Run tests
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm run test
         timeout-minutes: 15
 
@@ -131,11 +131,11 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm ci
 
       - name: Run tests
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm run test
         timeout-minutes: 15
 
@@ -160,15 +160,15 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm ci
 
       - name: Build
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm run build
 
       - name: Publish to npm
-        working-directory: ${{ github.workspace }}/opencode-subagents
+        working-directory: ${{ github.workspace }}
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
