@@ -43,8 +43,19 @@ describe('CLI: define-subagent', () => {
   }
 
   function runCliJson(args: string[], options: { cwd?: string; env?: Record<string, string> } = {}) {
-    const output = runCli(args, options);
-    return JSON.parse(output.trim());
+    try {
+      const output = runCli(args, options);
+      return JSON.parse(output.trim());
+    } catch (error) {
+      // `--doctor` exits with code 1 when the environment is not healthy
+      // (for example, warnings because ~/.config/opencode does not exist),
+      // but it still prints a valid JSON report on stdout.
+      const stdout = (error as { stdout?: unknown }).stdout;
+      if (args.includes('--doctor') && typeof stdout === 'string' && stdout.trim().startsWith('{')) {
+        return JSON.parse(stdout.trim());
+      }
+      throw error;
+    }
   }
 
   describe('--help', () => {
