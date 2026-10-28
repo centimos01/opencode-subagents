@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/opencode-subagents
         shell: bash
 
     steps:
@@ -56,7 +56,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/opencode-subagents
         shell: bash
     strategy:
       matrix:
@@ -86,7 +86,7 @@ jobs:
     timeout-minutes: 25
     defaults:
       run:
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/opencode-subagents
         shell: pwsh
     steps:
       - name: Checkout repository
@@ -113,7 +113,7 @@ jobs:
     timeout-minutes: 25
     defaults:
       run:
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/opencode-subagents
         shell: bash
     steps:
       - name: Checkout repository
@@ -141,7 +141,7 @@ jobs:
     timeout-minutes: 10
     defaults:
       run:
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/opencode-subagents
         shell: bash
     steps:
       - name: Checkout repository
