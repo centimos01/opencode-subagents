@@ -105,7 +105,10 @@ jobs:
   # Test on macOS
   test-macos:
     name: Test macOS
-    runs-on: macos-latest
+    # macos-latest is arm64 and regularly queues for >15 min (GitHub cancels
+    # jobs that never acquire a runner). The Intel image is architecture
+    # agnostic for this Node test suite and has more capacity.
+    runs-on: macos-15-intel
     needs: ci
     timeout-minutes: 25
     defaults:
