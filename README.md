@@ -1,202 +1,325 @@
-# Subagentes Autónomos en OpenCode v2
+# OpenCode Subagents v2
 
-Esta guía contiene la arquitectura, el código y las instrucciones paso a paso para replicar en cualquier ordenador el sistema de **subagentes autónomos y de alta velocidad** para OpenCode.
+> Autonomous subagent system for OpenCode v2 — create, invoke, and cleanup specialized AI subagents on-demand.
 
-Con este sistema, **la propia IA de OpenCode puede crear sus propios subagentes a medida que los necesita** (igual que Claude / Antigravity), ejecutando tareas especializadas en sesiones secundarias aisladas para responder mucho más rápido y evitar saturar la ventana de contexto.
+[![npm version](https://img.shields.io/npm/v/opencode-subagents.svg)](https://www.npmjs.com/package/opencode-subagents)
+[![Node.js Version](https://img.shields.io/node/v/opencode-subagents.svg)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
+## Overview
 
-## 📁 1. Estructura de Carpetas en el Sistema
+OpenCode Subagents v2 is a TypeScript-based CLI tool that enables you to dynamically create, manage, and cleanup specialized AI subagents for OpenCode. Inspired by Claude's subagent system, it allows you to spin up temporary agents for specific tasks (code exploration, testing, documentation, security auditing, etc.) and automatically clean them up when done — leaving zero residue on disk.
 
-En cualquier sistema operativo, OpenCode utiliza el directorio de configuración global de usuario:
+## Features
 
-- **Windows:** `C:\Users\<Usuario>\.config\opencode\` (o `%USERPROFILE%\.config\opencode\`)
-- **macOS / Linux:** `~/.config/opencode/`
+- 🚀 **Dynamic Subagent Creation** — Create specialized agents on-the-fly with custom prompts and permissions
+- 📦 **8 Built-in Templates** — Ready-to-use agents for common tasks (API testing, documentation, security, performance, etc.)
+- 🔒 **Permission Presets** — `readonly`, `review`, `test`, `worker` for fine-grained control
+- 🧹 **Zero-Residue Lifecycle** — Automatic cleanup with `cleanup_command` after task completion
+- 🌐 **Cross-Platform** — Works on Windows, macOS, and Linux
+- 🌍 **Bilingual** — English and Spanish support
+- 🏥 **Health Checks** — Built-in `doctor` command for setup verification
+- ⚡ **Dry-Run Mode** — Preview changes before applying
+- 🔧 **Unified Installer** — Single command to set up agents, instructions, and skills globally
 
-La estructura que debe quedar configurada es:
+## Installation
 
-```text
-.config/opencode/
-├── agents/                       <-- Definiciones Markdown de subagentes globales
-│   ├── fast-explorer.md          <-- Búsqueda y lectura ultrarrápida (solo lectura)
-│   ├── code-reviewer.md          <-- Revisión estricta de diffs y seguridad (solo lectura)
-│   ├── test-runner.md            <-- Ejecución y diagnóstico de tests
-│   └── code-worker.md            <-- Implementación de tareas de código en paralelo
-├── instructions/
-│   └── autonomous-subagents.md   <-- Instrucciones de sistema que enseñan a la IA a crear subagentes
-├── scripts/
-│   └── define-subagent.mjs       <-- Script CLI/Node para que la IA cree subagentes en 1 comando
-├── skills/
-│   └── autonomous-subagents/
-│       └── SKILL.md              <-- Skill nativo invocable con la tool 'skill'
-└── opencode.jsonc                <-- Configuración principal que activa instrucciones y agentes
-```
+### Quick Install (Recommended)
 
----
-
-## ⚡ 2. Instalación Rápida en tu otro PC
-
-Hemos incluido instaladores automáticos en esta carpeta. Solo tienes que copiar la carpeta `opencode-subagents-setup` a tu otro PC y ejecutar:
-
-### En Windows (PowerShell):
-Abre PowerShell en esta carpeta y ejecuta:
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\install.ps1
-```
-
-### En macOS / Linux (Terminal):
-Abre la terminal en esta carpeta y ejecuta:
 ```bash
-chmod +x install.sh
-./install.sh
+npx opencode-subagents@latest install
 ```
 
-El script creará todas las carpetas, copiará los archivos a `~/.config/opencode/`, configurará `opencode.jsonc` y recargará OpenCode automáticamente.
+Or install globally:
 
----
-
-## 🛠️ 3. Instalación Manual Paso a Paso
-
-Si prefieres hacerlo manualmente en el nuevo PC, sigue estos sencillos pasos:
-
-### Paso 1: Crear las carpetas necesarias
-En PowerShell:
-```powershell
-New-Item -ItemType Directory -Force -Path `
-  "$HOME\.config\opencode\agents", `
-  "$HOME\.config\opencode\instructions", `
-  "$HOME\.config\opencode\scripts", `
-  "$HOME\.config\opencode\skills\autonomous-subagents"
-```
-
-### Paso 2: Copiar el script de creación dinámica (`scripts/define-subagent.mjs`)
-Copia el archivo `scripts/define-subagent.mjs` de este paquete a `~/.config/opencode/scripts/`.
-
-Cada subagente creado sobre la marcha es **temporal**: el script devuelve un `cleanup_command` que la IA ejecuta al terminar la tarea para borrar el archivo y no dejar residuos en el disco (ver sección 4).
-
-Uso rápido:
 ```bash
-# Crear un subagente temporal para el proyecto actual:
-node C:/Users/<Usuario>/.config/opencode/scripts/define-subagent.mjs \
-  --name "database-debugger" \
-  --description "Analiza consultas SQL lentas y optimiza índices" \
-  --prompt "Eres un experto en PostgreSQL..." \
-  --preset readonly
-
-# Borrarlo después de usarlo (deja el disco limpio):
-node C:/Users/<Usuario>/.config/opencode/scripts/define-subagent.mjs --remove "database-debugger"
+npm install -g opencode-subagents
+opencode-subagents-install
 ```
 
-*Si ejecutas el borrado desde otra carpeta, añade `--dir "<ruta a .opencode/agents del proyecto>"`; al crear un subagente el propio script imprime el comando exacto en `cleanup_command`. `--list` muestra los subagentes existentes y `--global` los guarda para todos los proyectos.*
+### Manual Install
 
-### Paso 3: Crear las instrucciones para la IA (`instructions/autonomous-subagents.md`)
-Crea el archivo `~/.config/opencode/instructions/autonomous-subagents.md`.  
-*(Puedes copiar directamente el archivo que se encuentra en la subcarpeta `instructions/` de este paquete).*
+1. Clone this repository
+2. Run `npm install`
+3. Run `npm run build`
+4. Run `node dist/install.js`
 
-Este archivo enseña a la IA:
-- Cuándo debe delegar trabajo para no ralentizar el chat.
-- Cómo ejecutar `define-subagent.mjs` con su herramienta `shell`.
-- Cómo invocar el subagente recién creado con la herramienta `subagent`.
+## Quick Start
 
-### Paso 4: Crear el Skill nativo (`skills/autonomous-subagents/SKILL.md`)
-Crea el archivo `~/.config/opencode/skills/autonomous-subagents/SKILL.md`.  
-*(Copia el archivo ubicado en `skills/autonomous-subagents/SKILL.md` de este paquete).*
+```bash
+# Create a temporary API testing agent
+define-subagent --name "my-api-tester" --template api-tester
 
-### Paso 5: Copiar los subagentes base (`agents/*.md`)
-Copia los 4 archivos markdown (`fast-explorer.md`, `code-reviewer.md`, `test-runner.md`, `code-worker.md`) dentro de `~/.config/opencode/agents/`.
+# The CLI outputs a cleanup_command - save it!
+# Example: node define-subagent.js --remove "my-api-tester" --dir ".opencode/agents"
 
-### Paso 6: Configurar `opencode.jsonc`
-Edita o crea `~/.config/opencode/opencode.jsonc` agregando la clave `"instructions"`:
+# Invoke the agent in OpenCode
+# subagent(agent: "my-api-tester", description: "Tests REST APIs", prompt: "Test the user API endpoints")
+
+# After the agent completes its task, run the cleanup_command
+node define-subagent.js --remove "my-api-tester" --dir ".opencode/agents"
+
+# Verify cleanup
+define-subagent --list
+```
+
+## Templates
+
+| Template | Preset | Description |
+|----------|--------|-------------|
+| `api-tester` | test | Tests REST/GraphQL APIs, validates contracts, checks error handling |
+| `doc-writer` | worker | Writes technical documentation, README files, API docs |
+| `security-auditor` | review | Audits code for security vulnerabilities, secrets, compliance |
+| `perf-profiler` | readonly | Profiles performance, identifies bottlenecks, suggests optimizations |
+| `database-optimizer` | readonly | Analyzes schema, queries, indexes for optimization |
+| `dependency-updater` | readonly | Analyzes dependencies for updates, CVEs, breaking changes |
+| `migration-helper` | worker | Assists with framework upgrades, language versions, architecture changes |
+| `code-migrator` | worker | Performs large-scale code transformations (rename, restructure) |
+
+### Using Templates
+
+```bash
+# Create from template (auto-fills description, prompt, preset)
+define-subagent --name "my-security-auditor" --template security-auditor
+
+# Override template values
+define-subagent --name "custom-auditor" --template security-auditor --description "Focus on auth"
+```
+
+### Custom Agents
+
+```bash
+# Full custom agent
+define-subagent \
+  --name "my-custom-agent" \
+  --description "Does something specific" \
+  --prompt "You are a specialized agent that does X, Y, Z" \
+  --preset worker \
+  --mode subagent
+```
+
+## Permission Presets
+
+| Preset | Edit | Write | Patch | Shell | Use Case |
+|--------|------|-------|-------|-------|----------|
+| `readonly` | ✗ | ✗ | ✗ | ✗ | Exploration, analysis, reading |
+| `review` | ✗ | ✗ | ✗ | ✗ | Code review, security audit |
+| `test` | ✗ | ✗ | ✗ | ✓ | Running tests, test diagnosis |
+| `worker` | ✓ | ✓ | ✓ | ✓ | Implementation, refactoring |
+
+## Commands
+
+### `define-subagent`
+
+```bash
+# Create a subagent
+define-subagent --name <name> --description <desc> --prompt <prompt> [options]
+
+# Create from template
+define-subagent --name <name> --template <template-name>
+
+# List all subagents
+define-subagent --list
+
+# Remove a subagent (with cleanup)
+define-subagent --remove <name> --dir <agents-dir>
+
+# Run health checks
+define-subagent --doctor
+
+# Dry run (preview)
+define-subagent --name test --template api-tester --dry-run
+
+# Force overwrite
+define-subagent --name existing --template api-tester --force
+
+# Global scope
+define-subagent --name global-agent --template api-tester --global
+
+# Language
+define-subagent --lang es --help
+```
+
+### `opencode-subagents-install`
+
+```bash
+# Install globally (default)
+opencode-subagents-install
+
+# Dry run
+opencode-subagents-install --dry-run
+
+# Force overwrite
+opencode-subagents-install --force
+```
+
+## Architecture
+
+```mermaid
+graph TB
+    A[define-subagent CLI] --> B[Create Subagent]
+    A --> C[List Subagents]
+    A --> D[Remove Subagent]
+    A --> E[Doctor]
+    
+    B --> F[Template System]
+    F --> G[8 Built-in Templates]
+    F --> H[Variable Interpolation]
+    
+    B --> I[Permission Presets]
+    I --> J[readonly]
+    I --> K[review]
+    I --> L[test]
+    I --> M[worker]
+    
+    D --> N[Cleanup]
+    N --> O[Remove .md file]
+    N --> P[Clean legacy config]
+    N --> Q[Prune empty dirs]
+    N --> R[Reload OpenCode]
+    
+    S[opencode-subagents-install] --> T[Detect OS]
+    S --> U[Backup config]
+    S --> V[Validate opencode CLI]
+    S --> W[Copy agents/instructions/skills]
+    S --> X[Configure opencode.jsonc]
+```
+
+## Configuration
+
+The installer creates/updates `~/.config/opencode/opencode.jsonc` with:
+
 ```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    // Pon aquí la ruta absoluta hacia autonomous-subagents.md:
-    "C:\\Users\\<TuUsuario>\\.config\\opencode\\instructions\\autonomous-subagents.md"
-  ]
+    "{{INSTRUCTIONS_PATH}}/autonomous-subagents.md"
+  ],
+  "agents": {
+    "fast-explorer": { ... },
+    "code-reviewer": { ... },
+    "test-runner": { ... },
+    "code-worker": { ... }
+  }
 }
 ```
 
-### Paso 7: Recargar OpenCode
-Ejecuta en tu terminal:
-```bash
-opencode reload
-```
+Use `{{INSTRUCTIONS_PATH}}` placeholder which resolves to:
+- Windows: `C:\Users\<user>\.config\opencode\instructions`
+- macOS/Linux: `~/.config/opencode/instructions`
 
----
-
-## 🚀 4. ¿Cómo crea y usa los subagentes la IA?
-
-### A. La IA crea un subagente por sí sola
-Cuando la IA decide que necesita un asistente especializado (por ejemplo, para depurar bases de datos o migrar componentes), ejecuta internamente mediante `shell`:
+## Development
 
 ```bash
-node C:/Users/<Usuario>/.config/opencode/scripts/define-subagent.mjs \
-  --name "database-debugger" \
-  --description "Analiza consultas SQL lentas y optimiza índices" \
-  --prompt "Eres un experto en PostgreSQL. Analiza el esquema y las consultas dadas..." \
-  --preset readonly
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Run tests
+npm run test
+
+# Lint
+npm run lint
+
+# Type check
+npm run typecheck
+
+# Format
+npm run format
+
+# Watch mode
+npm run dev
 ```
 
-El script:
-1. Crea el archivo de agente con frontmatter y prompt.
-2. Aplica el preset de seguridad (`readonly` bloquea escrituras y comandos para máxima velocidad).
-3. Ejecuta `opencode reload` para que OpenCode lo registre al instante.
-4. Devuelve a la IA la sintaxis exacta de invocación y el `cleanup_command` para borrarlo después.
+## Project Structure
 
-*(El archivo Markdown es suficiente para el registro: el script ya no modifica `opencode.jsonc`, así no ensucia tu configuración.)*
-
-### B. La IA invoca al subagente
-Inmediatamente después de crearlo (o usando los predeterminados), la IA llama a la herramienta nativa:
-
-```json
-{
-  "agent": "database-debugger",
-  "description": "Optimizar consulta de pedidos por fecha",
-  "prompt": "Revisa la consulta en src/db/orders.ts y sugiere índices compuestos."
-}
+```
+opencode-subagents/
+├── src/
+│   ├── define-subagent.ts    # Main CLI entry point
+│   ├── install.ts            # Unified installer
+│   ├── index.ts              # Barrel exports
+│   ├── types.ts              # TypeScript interfaces
+│   ├── constants.ts          # Constants, presets, messages
+│   ├── utils-core.ts         # Core utilities (no deps)
+│   ├── utils.ts              # Extended utilities
+│   └── templates/
+│       └── index.ts          # 8 built-in templates
+├── tests/
+│   ├── barrel.test.ts        # Barrel export tests
+│   ├── define-subagent.test.ts # CLI integration tests
+│   ├── install.test.ts       # Installer tests
+│   └── integration.test.ts   # Full lifecycle tests
+├── agents/                   # Built-in agents (source)
+├── instructions/             # Instruction files
+├── skills/                   # Skill files
+├── dist/                     # Compiled output
+├── opencode.example.jsonc    # Example config with placeholders
+└── vitest.config.ts          # Test configuration
 ```
 
-El subagente se ejecuta en una **sesión hija con contexto limpio**, resuelve la tarea y le devuelve a la IA principal un resumen concreto, sin llenar el chat principal de tokens innecesarios.
+## Lifecycle Management
 
-### C. La IA borra el subagente temporal (sin residuos)
-Los subagentes creados sobre la marcha son **temporales**. Justo después de recibir el resultado, la IA ejecuta el `cleanup_command` que devolvió el script (equivale a `--remove "<nombre>" --dir "<carpeta>"`). Ese comando:
-1. Borra el archivo `.md` del subagente.
-2. Limpia cualquier entrada antigua `agents.<nombre>` que versiones anteriores hubieran escrito en `opencode.jsonc`.
-3. Elimina las carpetas `.opencode/agents` si quedaron vacías.
+Subagents created on-the-fly are **temporary** and must be cleaned up:
 
-Así no se acumula basura en el proyecto: cada subagente temporal nace y desaparece en la misma tarea.
+1. **Create** → Returns `cleanup_command`
+2. **Invoke** → Use OpenCode's `subagent` tool
+3. **Cleanup** → Run `cleanup_command` immediately after task completion
 
----
+```
+Lifecycle:
+  create → invoke → cleanup → --list (empty)
+```
 
-## 🏎️ 5. Presets Disponibles para la IA
+The cleanup process:
+- Removes the `.md` agent file
+- Cleans legacy `agents.<name>` entries from `opencode.jsonc`
+- Prunes empty `.opencode/agents` directories
+- Reloads OpenCode configuration
 
-| Preset | Permisos denegados | Cuándo usarlo |
-| :--- | :--- | :--- |
-| `readonly` | `edit`, `write`, `patch`, `shell` | Para exploración de archivos, búsquedas, lectura de documentación. Es el más rápido y seguro. |
-| `review` | `edit`, `write`, `patch`, `shell` | Para revisiones de código, auditorías de seguridad y pull requests. |
-| `test` | `edit`, `write`, `patch` (Permite `shell`) | Para ejecutar tests, linters y diagnósticos sin alterar código. |
-| `worker` | Ninguno (herramientas completas) | Para escribir código o aplicar cambios en paralelo. |
+## Troubleshooting
 
----
+### "agent_exists" error
+```bash
+# A file with this name already exists. If it's a leftover temporary agent:
+node define-subagent.js --remove "agent-name" --dir ".opencode/agents"
 
-## ✅ 6. Comprobación de que todo funciona
+# Then retry with --force
+define-subagent --name "agent-name" --template api-tester --force
+```
 
-Para comprobar que el sistema está activo en tu nuevo PC:
-1. Lista los subagentes registrados:
-   ```bash
-   node C:/Users/<Usuario>/.config/opencode/scripts/define-subagent.mjs --list
-   ```
-2. Consulta la configuración activa en el servidor:
-   ```bash
-   opencode api GET /api/config
-   ```
-3. En cualquier chat de OpenCode, puedes pedirle a la IA:
-   > *"Crea un subagente para auditar accesibilidad web y úsalo para revisar mi archivo index.html"*
-   La IA creará el subagente `a11y-auditor` sobre la marcha, lo ejecutará y lo borrará al terminar, sin dejar archivos.
-4. Comprueba que no quedan residuos:
-   ```bash
-   node C:/Users/<Usuario>/.config/opencode/scripts/define-subagent.mjs --list
-   ```
-   Tras terminar la tarea, el subagente temporal ya no debe aparecer en `project` y no debe quedar ninguna carpeta `.opencode/agents` sobrante en el proyecto.
+### "OpenCode CLI not found"
+```bash
+# Install OpenCode from https://opencode.ai
+# Verify with: opencode --version
+```
+
+### Doctor shows "degraded" or "unhealthy"
+```bash
+# Run doctor for details
+define-subagent --doctor
+
+# Common fixes:
+# - Install OpenCode CLI
+# - Run installer: opencode-subagents-install
+# - Check global config directory permissions
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+- Adding new templates
+- Code style
+- Testing
+- Pull request process
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## Related
+
+- [OpenCode](https://opencode.ai) - The AI coding agent
+- [Superpowers](https://github.com/opencode-ai/superpowers) - Skills and workflows for OpenCode
