@@ -31,6 +31,18 @@
   ],
   "author": "",
   "license": "MIT",
+  "files": [
+    "dist/",
+    "agents/",
+    "instructions/",
+    "skills/",
+    "scripts/",
+    "opencode.example.jsonc",
+    "README.md",
+    "LICENSE",
+    "TROUBLESHOOTING.md",
+    "CONTRIBUTING.md"
+  ],
   "engines": {
     "node": ">=20.0.0"
   },
